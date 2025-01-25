@@ -107,11 +107,16 @@ int Euclid_algo(int a, int b) {
 
 //checking the keys generation capability
 bool IsGenPos(int& p, int& q) {
-	if (p * q >= 256) {
-		return 1;
+	if ((IsPrime(p) == 0) || (IsPrime(q) == 0)) {
+		return 0;
 	}
 	else {
-		return 0;
+		if (p * q >= 256) {
+			return 1;
+		}
+		else {
+			return 0;
+		}
 	}
 }
 
@@ -135,6 +140,9 @@ vector<char> translation(vector<char>& message, pair <pair<int, int>, int> &keys
 	vector<char> mutation;
 	for (int i = 0; i < message.size(); i++) {
 		trans1[i] = (int)message[i];
+		if (trans1[i] < 0) {
+			trans1[i] = trans1[i] + 256;
+		}
 	}
 
 	/*cout << "trans1: ";
@@ -222,7 +230,7 @@ vector<char> retranslation(vector<char> &server_gift, pair <pair<int, int>, int>
 	return answer;
 }
 
-/*int main() {
+int main() {
 	cout << "Введите два простых числа p и q:" << endl;
 	int p, q;
 	cin >> p >> q;
@@ -236,9 +244,15 @@ vector<char> retranslation(vector<char> &server_gift, pair <pair<int, int>, int>
 	pair<pair<int, int>, int> work = key_generation(p, q);
 	string input;
 	getline(cin, input);
+	vector<char> symbols;
+	for (int i = 0; i < input.size(); i++) {
+		symbols.push_back(input[i]);
+	}
 	
-	vector<char> to_server = translation(input, work);
-	string result = retranslation(to_server, work);
-	cout << result;
+	vector<char> to_server = translation(symbols, work);
+	vector<char> result = retranslation(to_server, work);
+	for (int i = 0; i < result.size(); i++) {
+		cout << result[i];
+	}
 	return 0;
-}*/
+}
