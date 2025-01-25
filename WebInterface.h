@@ -10,7 +10,7 @@
 #define HIGH_VERSION 2.2
 #define IP "127.0.0.1"
 #define PORT 1234
-#define BUFF_SIZE 30
+#define BUFF_SIZE 256
 #define SEND_TIMEOUT 1000 // millsec
 
 bool CheckVersion();

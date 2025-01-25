@@ -130,7 +130,7 @@ pair<pair<int, int>, int> key_generation(int &p, int &q) {
 }
 
 //encrypting an incoming message
-vector<char> translation(string& message, pair <pair<int, int>, int> &keys) {
+vector<char> translation(vector<char>& message, pair <pair<int, int>, int> &keys) {
 	vector<int> trans1(message.size()), trans2(message.size());
 	vector<char> mutation;
 	for (int i = 0; i < message.size(); i++) {
@@ -186,7 +186,7 @@ int exponent(int a, int n) {
 }
 
 //decryption and assembly of the final message
-string retranslation(vector<char> &server_gift, pair <pair<int, int>, int> &keys) {
+vector<char> retranslation(vector<char> &server_gift, pair <pair<int, int>, int> &keys) {
 	vector<int> sg;
 	int a = 0, count = 0;
 	for (int i = 0; i < server_gift.size(); i++) {
@@ -201,7 +201,7 @@ string retranslation(vector<char> &server_gift, pair <pair<int, int>, int> &keys
 		}
 	}
 	vector<int> gift(sg.size());
-	string answer;
+	vector<char> answer;
 	for (int i = 0; i < sg.size(); i++) {
 		int count = 0;
 		int res = 1;

@@ -41,9 +41,10 @@ SOCKET& CreateSocket() {
 }
 
 void EndString(char* text, int len) {
-	for (int i = 0; i < len; i++) {
-		if (text[i] == ' ') {
-			text[i] = '\0';
+	for (int i = len - 1; i >= 0; i--) {
+		if (text[i] != ' ') {
+			if(i + 1 < len)
+				text[i +1] = '\0';
 			return;
 		}
 	}
@@ -53,5 +54,12 @@ void PrintString(char* text, int len) {
 	int i = 0;
 	while (text[i] != '\0' && i < len) {
 		cout << text[i++];
+	}
+}
+
+int RealSize(char* text, int len) {
+	for (int i = len - 1; i >= 0; i--) {
+		if (text[i] != ' ')
+			return i + 1;
 	}
 }
