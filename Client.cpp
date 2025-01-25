@@ -40,5 +40,46 @@ int main() {
 	else
 		cout << "Connection established SUCCESSFULLY. Ready to send a message to Server"<< endl;
 
+	vector <char> servBuff(BUFF_SIZE), clientBuff(BUFF_SIZE);							
+	short packet_size = 0;
 
+	while (true) {
+
+		cout << "Your (Client) message to Server: ";
+		fgets(clientBuff.data(), clientBuff.size(), stdin);
+
+		// Check whether client like to stop chatting 
+		if (clientBuff[0] == 'x' && clientBuff[1] == 'x' && clientBuff[2] == 'x') {
+			shutdown(ClientSock, SD_BOTH);
+			closesocket(ClientSock);
+			WSACleanup();
+			return 0;
+		}
+
+		packet_size = send(ClientSock, clientBuff.data(), clientBuff.size(), 0);
+
+		if (packet_size == SOCKET_ERROR) {
+			cout << "Can't send message to Server. Error # " << WSAGetLastError() << endl;
+			closesocket(ClientSock);
+			WSACleanup();
+			return 1;
+		}
+
+		packet_size = recv(ClientSock, servBuff.data(), servBuff.size(), 0);
+
+		if (packet_size == SOCKET_ERROR) {
+			cout << "Can't receive message from Server. Error # " << WSAGetLastError() << endl;
+			closesocket(ClientSock);
+			WSACleanup();
+			return 1;
+		}
+		else
+			cout << "Server message: " << servBuff.data() << endl;
+
+	}
+
+	closesocket(ClientSock);
+	WSACleanup();
+
+	return 0;
 }

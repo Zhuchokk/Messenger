@@ -57,15 +57,39 @@ int main() {
 
 	int clientInfo_size = sizeof(clientInfo);
 
-	SOCKET ClientConn = accept(ServSock, (sockaddr*)&clientInfo, &clientInfo_size);
+	SOCKET ClientConn1 = accept(ServSock, (sockaddr*)&clientInfo, &clientInfo_size);
 
-	if (ClientConn == INVALID_SOCKET) {
+	if (ClientConn1 == INVALID_SOCKET) {
 		cout << "Client detected, but can't connect to a client. Error # " << WSAGetLastError() << endl;
 		closesocket(ServSock);
-		closesocket(ClientConn);
+		closesocket(ClientConn1);
 		WSACleanup();
 		return 1;
 	}
 	else
 		cout << "Connection to a client established successfully" << endl;
+
+	erStat = listen(ServSock, SOMAXCONN);
+	SOCKET ClientConn2 = accept(ServSock, (sockaddr*)&clientInfo, &clientInfo_size);
+
+	vector <char> servBuff(BUFF_SIZE), clientBuff(BUFF_SIZE);
+	short packet_size = 0;
+
+	while (true) {
+		packet_size = recv(ClientConn1, servBuff.data(), servBuff.size(), 0);
+		packet_size = send(ClientConn2, servBuff.data(), servBuff.size(), 0);
+
+		packet_size = recv(ClientConn2, servBuff.data(), servBuff.size(), 0);
+		packet_size = send(ClientConn1, servBuff.data(), servBuff.size(), 0);
+
+
+		if (packet_size == SOCKET_ERROR) {
+			cout << "Can't send message to Client. Error # " << WSAGetLastError() << endl;
+			closesocket(ServSock);
+			closesocket(ClientConn1);
+			WSACleanup();
+			return 1;
+		}
+
+	}
 }

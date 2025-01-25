@@ -10,6 +10,7 @@
 #define HIGH_VERSION 2.2
 #define IP "127.0.0.1"
 #define PORT 1234
+#define BUFF_SIZE 10
 
 bool CheckVersion();
 
