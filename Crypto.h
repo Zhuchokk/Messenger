@@ -7,11 +7,12 @@
 #include <cmath>
 using namespace std;
 
-long long gcd(long long a, long long b);
-bool IsPrime(long long& N);
-long long Euler(long long& N);
-long long Euclid_algo(long long a, long long b);
-pair<pair<long long, long long>, long long> key_generation(long long& p, long long& q);
-vector<long long> translation(string& message, pair <pair<long long, long long>, long long>& keys);
-string retranslation(vector<long long>& server_gift, pair <pair<long long, long long>, long long>& keys);
-bool IsGenPos(long long& p, long long& q);
+int gcd(int a, int b);
+bool IsPrime(int& N);
+int Euler(int& N);
+int Euclid_algo(int a, int b);
+pair<pair<int, int>, int> key_generation(int& p, int& q);
+vector<char> translation(string& message, pair <pair<int, int>, int>& keys);
+string retranslation(vector<char>& server_gift, pair <pair<int, int>, int>& keys);
+bool IsGenPos(int& p, int& q);
+int exponent(int a, int n);

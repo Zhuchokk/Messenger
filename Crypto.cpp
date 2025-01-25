@@ -130,8 +130,9 @@ pair<pair<int, int>, int> key_generation(int &p, int &q) {
 }
 
 //encrypting an incoming message
-vector<int> translation(string& message, pair <pair<int, int>, int> &keys) {
+vector<char> translation(string& message, pair <pair<int, int>, int> &keys) {
 	vector<int> trans1(message.size()), trans2(message.size());
+	vector<char> mutation;
 	for (int i = 0; i < message.size(); i++) {
 		trans1[i] = (int)message[i];
 	}
@@ -157,18 +158,55 @@ vector<int> translation(string& message, pair <pair<int, int>, int> &keys) {
 	}
 	cout << endl;*/
 
-	return trans2;
+	for (int i = 0; i < message.size(); i++) {
+		while (trans2[i] != 0) {
+			mutation.push_back(char(trans2[i] % 10 + 48));
+			trans2[i] = trans2[i] / 10;
+		}
+		mutation.push_back(char(45));
+	}
+	
+	/*cout << "mutation: ";
+	for (int i = 0; i < mutation.size(); i++) {
+		cout << mutation[i] << " ";
+	}
+	cout << endl;*/
+
+	return mutation;
+}
+
+//exponentiation
+int exponent(int a, int n) {
+	if (n == 0) {
+		return 1;
+	}
+	else {
+		return a * exponent(a, n - 1);
+	}
 }
 
 //decryption and assembly of the final message
-string retranslation(vector<int> &server_gift, pair <pair<int, int>, int> &keys) {
-	vector<int> gift(server_gift.size());
-	string answer;
+string retranslation(vector<char> &server_gift, pair <pair<int, int>, int> &keys) {
+	vector<int> sg;
+	int a = 0, count = 0;
 	for (int i = 0; i < server_gift.size(); i++) {
+		if ((int)server_gift[i] != 45) {
+			a = a + ((int)server_gift[i] - 48) * exponent(10, count);
+			count++;
+		}
+		else {
+			sg.push_back(a);
+			a = 0;
+			count = 0;
+		}
+	}
+	vector<int> gift(sg.size());
+	string answer;
+	for (int i = 0; i < sg.size(); i++) {
 		int count = 0;
 		int res = 1;
 		while (count < keys.first.second) {
-			res = (res * server_gift[i]) % keys.second;
+			res = (res * sg[i]) % keys.second;
 			count++;
 		}
 		gift[i] = res;
@@ -176,7 +214,7 @@ string retranslation(vector<int> &server_gift, pair <pair<int, int>, int> &keys)
 	}
 
 	/*cout << "gift: ";
-	for (int i = 0; i < server_gift.size(); i++) {
+	for (int i = 0; i < sg.size(); i++) {
 		cout << gift[i] << " ";
 	}
 	cout << endl;*/
@@ -198,7 +236,8 @@ string retranslation(vector<int> &server_gift, pair <pair<int, int>, int> &keys)
 	pair<pair<int, int>, int> work = key_generation(p, q);
 	string input;
 	getline(cin, input);
-	vector<int> to_server = translation(input, work);
+	
+	vector<char> to_server = translation(input, work);
 	string result = retranslation(to_server, work);
 	cout << result;
 	return 0;
