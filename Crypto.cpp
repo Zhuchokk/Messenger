@@ -119,7 +119,7 @@ bool IsGenPos(long long& p, long long& q) {
 pair<pair<long long, long long>, long long> key_generation(long long &p, long long &q) {
 	long long N = p * q;
 	long long f = Euler(N);
-	long long e = 691;
+	long long e = f - 1;
 	long long d = Euclid_algo(e, f);
 	pair <pair<long long, long long>, long long> a;
 	a.first.first = e;
