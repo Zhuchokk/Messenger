@@ -230,7 +230,7 @@ vector<char> retranslation(vector<char> &server_gift, pair <pair<int, int>, int>
 	return answer;
 }
 
-int main() {
+/*int main() {
 	cout << "Введите два простых числа p и q:" << endl;
 	int p, q;
 	cin >> p >> q;
@@ -255,4 +255,4 @@ int main() {
 		cout << result[i];
 	}
 	return 0;
-}
+}*/
