@@ -184,7 +184,7 @@ string retranslation(vector<long long> &server_gift, pair <pair<long long, long 
 	return answer;
 }
 
-int main() {
+/*int main() {
 	cout << "Введите два простых числа p и q:" << endl;
 	long long p, q;
 	cin >> p >> q;
@@ -202,4 +202,4 @@ int main() {
 	string result = retranslation(to_server, work);
 	cout << result;
 	return 0;
-}
+}*/
