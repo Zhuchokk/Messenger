@@ -10,8 +10,13 @@
 #define HIGH_VERSION 2.2
 #define IP "127.0.0.1"
 #define PORT 1234
-#define BUFF_SIZE 10
+#define BUFF_SIZE 30
+#define SEND_TIMEOUT 1000 // millsec
 
 bool CheckVersion();
 
 SOCKET& CreateSocket();
+
+void EndString(char* text, int len);
+
+void PrintString(char* text, int len);

@@ -3,6 +3,7 @@
 #include <WS2tcpip.h>
 #include<windef.h>
 #include"WebInterface.h"
+#include<vector>
 
 #pragma comment(lib, "Ws2_32.lib")
 
@@ -37,4 +38,20 @@ SOCKET& CreateSocket() {
 	else
 		cout << "Server socket initialization is OK" << endl;
 	return *Sock;
+}
+
+void EndString(char* text, int len) {
+	for (int i = 0; i < len; i++) {
+		if (text[i] == ' ') {
+			text[i] = '\0';
+			return;
+		}
+	}
+}
+
+void PrintString(char* text, int len) {
+	int i = 0;
+	while (text[i] != '\0' && i < len) {
+		cout << text[i++];
+	}
 }

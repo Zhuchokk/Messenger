@@ -5,11 +5,41 @@
 #include <vector>
 #include<windef.h>
 #include"../WebInterface.h"
+#include<thread>
+#include <queue>
+#include<chrono>
 
 
 #pragma comment(lib, "Ws2_32.lib")
 
 using namespace std;
+
+queue<vector<char>> mes_to_send;
+vector<SOCKET> clients;
+
+void RecieveData(SOCKET client) {
+	vector <char> Buff(BUFF_SIZE);
+	while (true) {
+		short packet_size = recv(client, Buff.data(), Buff.size(), 0);
+		if (packet_size != SOCKET_ERROR) {
+			mes_to_send.push(Buff);
+			PrintString(Buff.data(), Buff.size());
+		}
+			
+	}
+	
+}
+void SendData() {
+	while (true) {
+		if (!mes_to_send.empty()) {
+			for (int i = 0; i < clients.size(); i++) {
+				short packet_size = send(clients[i], mes_to_send.front().data(), mes_to_send.front().size(), 0);
+			}
+			mes_to_send.pop();
+		}
+		this_thread::sleep_for(chrono::milliseconds(SEND_TIMEOUT));
+	}
+}
 
 int main() {
 	CheckVersion();
@@ -39,57 +69,36 @@ int main() {
 	else
 		cout << "Binding socket to Server info is OK" << endl;
 
-	erStat = listen(ServSock, SOMAXCONN);
-
-	if (erStat != 0) {
-		cout << "Can't start to listen to. Error # " << WSAGetLastError() << endl;
-		closesocket(ServSock);
-		WSACleanup();
-		return 1;
-	}
-	else {
-		cout << "Listening..." << endl;
-	}
-
-	sockaddr_in clientInfo;
-
-	ZeroMemory(&clientInfo, sizeof(clientInfo));
-
-	int clientInfo_size = sizeof(clientInfo);
-
-	SOCKET ClientConn1 = accept(ServSock, (sockaddr*)&clientInfo, &clientInfo_size);
-
-	if (ClientConn1 == INVALID_SOCKET) {
-		cout << "Client detected, but can't connect to a client. Error # " << WSAGetLastError() << endl;
-		closesocket(ServSock);
-		closesocket(ClientConn1);
-		WSACleanup();
-		return 1;
-	}
-	else
-		cout << "Connection to a client established successfully" << endl;
-
-	erStat = listen(ServSock, SOMAXCONN);
-	SOCKET ClientConn2 = accept(ServSock, (sockaddr*)&clientInfo, &clientInfo_size);
-
-	vector <char> servBuff(BUFF_SIZE), clientBuff(BUFF_SIZE);
-	short packet_size = 0;
+	thread sending(SendData);
+	sending.detach();
 
 	while (true) {
-		packet_size = recv(ClientConn1, servBuff.data(), servBuff.size(), 0);
-		packet_size = send(ClientConn2, servBuff.data(), servBuff.size(), 0);
+		erStat = listen(ServSock, SOMAXCONN);
 
-		packet_size = recv(ClientConn2, servBuff.data(), servBuff.size(), 0);
-		packet_size = send(ClientConn1, servBuff.data(), servBuff.size(), 0);
-
-
-		if (packet_size == SOCKET_ERROR) {
-			cout << "Can't send message to Client. Error # " << WSAGetLastError() << endl;
+		if (erStat != 0) {
+			cout << "Can't start to listen to. Error # " << WSAGetLastError() << endl;
 			closesocket(ServSock);
-			closesocket(ClientConn1);
 			WSACleanup();
 			return 1;
 		}
+		else {
+			cout << "Listening..." << endl;
+		}
 
+		sockaddr_in clientInfo;
+
+		ZeroMemory(&clientInfo, sizeof(clientInfo));
+
+		int clientInfo_size = sizeof(clientInfo);
+
+		SOCKET ClientConn = accept(ServSock, (sockaddr*)&clientInfo, &clientInfo_size);
+		if (ClientConn != INVALID_SOCKET) {
+			thread receiving(RecieveData, ClientConn);
+			receiving.detach();
+			clients.push_back(ClientConn);
+		}
+			
 	}
+
+	
 }

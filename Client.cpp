@@ -5,10 +5,26 @@
 #include <vector>
 #include<windef.h>
 #include"WebInterface.h"
+#include<thread>
 
 #pragma comment(lib, "Ws2_32.lib")
 
 using namespace std;
+
+void RecieveData(SOCKET self) {
+	vector <char> Buff(BUFF_SIZE);
+
+
+	while (true) {
+		short packet_size = recv(self, Buff.data(), Buff.size(), 0);
+		if (packet_size != SOCKET_ERROR) {
+			PrintString(Buff.data(), Buff.size());
+		}
+
+	}
+
+}
+
 
 int main() {
 	CheckVersion();
@@ -27,7 +43,7 @@ int main() {
 
 	servInfo.sin_family = AF_INET;
 	servInfo.sin_addr = ip_to_num;	  // Server's IPv4 after inet_pton() function
-	servInfo.sin_port = htons(1234);
+	servInfo.sin_port = htons(PORT);
 
 	erStat = connect(ClientSock, (sockaddr*)&servInfo, sizeof(servInfo));
 
@@ -40,13 +56,17 @@ int main() {
 	else
 		cout << "Connection established SUCCESSFULLY. Ready to send a message to Server"<< endl;
 
-	vector <char> servBuff(BUFF_SIZE), clientBuff(BUFF_SIZE);							
+	thread recieving(RecieveData, ClientSock);
+	recieving.detach();
+
+	vector <char> clientBuff(BUFF_SIZE);							
 	short packet_size = 0;
 
 	while (true) {
 
 		cout << "Your (Client) message to Server: ";
 		fgets(clientBuff.data(), clientBuff.size(), stdin);
+		EndString(clientBuff.data(), clientBuff.size());
 
 		// Check whether client like to stop chatting 
 		if (clientBuff[0] == 'x' && clientBuff[1] == 'x' && clientBuff[2] == 'x') {
@@ -65,16 +85,7 @@ int main() {
 			return 1;
 		}
 
-		packet_size = recv(ClientSock, servBuff.data(), servBuff.size(), 0);
-
-		if (packet_size == SOCKET_ERROR) {
-			cout << "Can't receive message from Server. Error # " << WSAGetLastError() << endl;
-			closesocket(ClientSock);
-			WSACleanup();
-			return 1;
-		}
-		else
-			cout << "Server message: " << servBuff.data() << endl;
+		
 
 	}
 
