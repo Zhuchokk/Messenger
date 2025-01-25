@@ -74,7 +74,8 @@ int main() {
 		crypt_len++;
 	}
 	crypt_len++; // because of using '-' as separator
-	
+	getchar(); // plug for avoiding '\n' in fgets
+
 	thread recieving(RecieveData, ClientSock);
 	recieving.detach();
 
@@ -88,9 +89,10 @@ int main() {
 		/*EndString(clientBuff.data(), clientBuff.size());*/
 
 		//cout << "for encrypt:\n";
-		//PrintString(clientBuff.data(), clientBuff.size());
+		/*PrintString(clientBuff.data(), clientBuff.size());*/
 
 		encrypted = translation(clientBuff, key);
+		/*cout << encrypted.size();*/
 		//PrintString(retranslation(encrypted, key).data(), BUFF_SIZE);
 
 		// Check whether client like to stop chatting 
