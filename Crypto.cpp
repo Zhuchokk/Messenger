@@ -105,6 +105,16 @@ long long Euclid_algo(long long a, long long b) {
 	return u1 == 1 ? (u2 + b) % b : -1;
 }
 
+//checking the keys generation capability
+bool IsGenPos(long long& p, long long& q) {
+	if (p * q >= 256) {
+		return 1;
+	}
+	else {
+		return 0;
+	}
+}
+
 //open and private keys generation
 pair<pair<long long, long long>, long long> key_generation(long long &p, long long &q) {
 	long long N = p * q;
@@ -115,7 +125,7 @@ pair<pair<long long, long long>, long long> key_generation(long long &p, long lo
 	a.first.first = e;
 	a.first.second = d;
 	a.second = N;
-	cout << "e: " << e << endl << "d: " << d << endl << "N: " << N << endl;
+	//cout << "e: " << e << endl << "d: " << d << endl << "N: " << N << endl;
 	return a;
 }
 
@@ -126,11 +136,11 @@ vector<long long> translation(string& message, pair <pair<long long, long long>,
 		trans1[i] = (int)message[i];
 	}
 
-	cout << "trans1: ";
+	/*cout << "trans1: ";
 	for (long long i = 0; i < trans1.size(); i++) {
 		cout << trans1[i] << " ";
 	}
-	cout << endl;
+	cout << endl;*/
 
 	for (long long i = 0; i < message.size(); i++) {
 		long long count = 0;
@@ -141,11 +151,11 @@ vector<long long> translation(string& message, pair <pair<long long, long long>,
 		}
 		trans2[i] = res;
 	}
-	cout << "trans2: ";
+	/*cout << "trans2: ";
 	for (long long i = 0; i < trans2.size(); i++) {
 		cout << trans2[i] << " ";
 	}
-	cout << endl;
+	cout << endl;*/
 
 	return trans2;
 }
@@ -165,19 +175,26 @@ string retranslation(vector<long long> &server_gift, pair <pair<long long, long 
 		answer.push_back(char(res));
 	}
 
-	cout << "gift: ";
+	/*cout << "gift: ";
 	for (long long i = 0; i < server_gift.size(); i++) {
 		cout << gift[i] << " ";
 	}
-	cout << endl;
+	cout << endl;*/
 
 	return answer;
 }
 
-/*int main() {
-	cout << "Введите два простых числа p и q, лежащих в интервале от 1 до 100";
+int main() {
+	cout << "Введите два простых числа p и q:" << endl;
 	long long p, q;
 	cin >> p >> q;
+	int a = IsGenPos(p, q);
+
+	while (a == 0) {
+		cout << "Невозможно сгенерировать ключи." << endl << "Введите два простых числа p и q:" << endl;
+		cin >> p >> q;
+		a = IsGenPos(p, q);
+	}
 	pair<pair<long long, long long>, long long> work = key_generation(p, q);
 	string input;
 	getline(cin, input);
@@ -185,4 +202,4 @@ string retranslation(vector<long long> &server_gift, pair <pair<long long, long 
 	string result = retranslation(to_server, work);
 	cout << result;
 	return 0;
-}*/
+}
