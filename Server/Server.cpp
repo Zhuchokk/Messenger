@@ -24,6 +24,7 @@ void RecieveData(SOCKET client) {
 		if (packet_size != SOCKET_ERROR) {
 			mes_to_send.push(Buff);
 			PrintString(Buff.data(), Buff.size());
+			cout << endl;
 		}
 			
 	}
