@@ -40,6 +40,12 @@ void RecieveData(SOCKET client) {
 			cout << "User ";
 			PrintString(Buff.data(), Buff.size());
 			cout << " connected" << endl;
+			//Sending message about new user to all
+			Buff.insert(Buff.begin(), 'M');
+			Buff.insert(Buff.begin(), 'S');
+			Buff.push_back(':');
+			Buff.push_back(':');
+			mes_to_send.push(Buff);
 			greeting = 1;
 		}
 		//ordinary recieving

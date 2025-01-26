@@ -13,6 +13,7 @@
 using namespace std;
 
 pair<pair<int, int>, int> key;
+vector<vector<char>> available_users = { {}};
 
 void RecieveData(SOCKET self) {
 	vector <char> Buff(BUFF_SIZE);
@@ -21,8 +22,24 @@ void RecieveData(SOCKET self) {
 	while (true) {
 		short packet_size = recv(self, Buff.data(), Buff.size(), 0);
 		if (packet_size != SOCKET_ERROR) {
-			vector<char> txt = retranslation(Buff, key);
-			PrintString(txt.data(), txt.size());
+			if (Buff[0] == 'S' && Buff[1] == 'M') { //Server messege
+				vector<char> name;
+				for (int i = 2; i < Buff.size(); i++) {
+					if (Buff[i] != ' ' && Buff[i] != '\0')
+						name.push_back(Buff[i]);
+					else
+						break;
+				}
+				cout << "\nNew user: ";
+				PrintString(name.data(), name.size());
+				cout << endl;
+				available_users.push_back(name);
+			}
+			else {
+				vector<char> txt = retranslation(Buff, key);
+				PrintString(txt.data(), txt.size());
+			}
+			
 		}
 
 	}
