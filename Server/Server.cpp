@@ -16,16 +16,41 @@ using namespace std;
 
 queue<vector<char>> mes_to_send;
 vector<SOCKET> clients;
+vector<vector<char>> names;
 
 void RecieveData(SOCKET client) {
-	vector <char> Buff(BUFF_SIZE);
+	bool greeting = 0;
 	while (true) {
+		vector <char> Buff(BUFF_SIZE);
 		short packet_size = recv(client, Buff.data(), Buff.size(), 0);
-		if (packet_size != SOCKET_ERROR) {
-			mes_to_send.push(Buff);
+		//first greeting, the user sending his name
+		if (!greeting) {
+			clients.push_back(client);
+			int rs = 0;
+			for (int i = 0; i < Buff.size(); i++) {
+				if (Buff[i] != ' ' && Buff[i] != '\0') {
+					rs++;
+				}
+				else {
+					break;
+				}
+			}
+			Buff.resize(rs);
+			names.push_back(Buff);
+			cout << "User ";
 			PrintString(Buff.data(), Buff.size());
-			cout << endl;
+			cout << " connected" << endl;
+			greeting = 1;
 		}
+		//ordinary recieving
+		else {
+			if (packet_size != SOCKET_ERROR) {
+				mes_to_send.push(Buff);
+				PrintString(Buff.data(), Buff.size());
+				cout << endl;
+			}
+		}
+		
 			
 	}
 	
@@ -33,9 +58,33 @@ void RecieveData(SOCKET client) {
 void SendData() {
 	while (true) {
 		if (!mes_to_send.empty()) {
-			for (int i = 0; i < clients.size(); i++) {
-				short packet_size = send(clients[i], mes_to_send.front().data(), mes_to_send.front().size(), 0);
+			//Separating a name from a text
+			auto start = find(mes_to_send.front().begin(), mes_to_send.front().end(), ':');
+			vector<char> recipient_name;
+			start++;
+			while (start != mes_to_send.front().end() && *start != ':') {
+				recipient_name.push_back(*start);
+				start++;
+				cout << *start;
 			}
+			mes_to_send.front().resize(start - mes_to_send.front().begin() -1 - recipient_name.size());
+
+			if (recipient_name.size() != 0) {
+				//sending only to certain names
+				for (int i = 0; i < names.size(); i++) {
+					if (names[i] == recipient_name) {
+						short packet_size = send(clients[i], mes_to_send.front().data(), mes_to_send.front().size(), 0);
+					}
+				}
+			}
+			else {
+				//sending to all
+				for (int i = 0; i < clients.size(); i++) {
+
+					short packet_size = send(clients[i], mes_to_send.front().data(), mes_to_send.front().size(), 0);
+				}
+			}
+			
 			mes_to_send.pop();
 		}
 		this_thread::sleep_for(chrono::milliseconds(SEND_TIMEOUT));
@@ -96,7 +145,6 @@ int main() {
 		if (ClientConn != INVALID_SOCKET) {
 			thread receiving(RecieveData, ClientConn);
 			receiving.detach();
-			clients.push_back(ClientConn);
 		}
 			
 	}

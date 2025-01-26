@@ -12,6 +12,8 @@
 #define PORT 1234
 #define BUFF_SIZE 256
 #define SEND_TIMEOUT 1000 // millsec
+#define NAME_LIMIT 6 // < BUFF_DATA
+
 
 bool CheckVersion();
 
