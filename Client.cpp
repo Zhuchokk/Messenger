@@ -105,9 +105,8 @@ int main() {
 	while (true) {
 
 		vector<char> encrypted(BUFF_SIZE), recipient(NAME_LIMIT);
-		cout << "Enter the recipient: ";
 		for (int i = 0; i < NAME_LIMIT; i++) {
-			if (cin.peek() == '\n') {
+			if (cin.peek() == ':') {
 				recipient[i] = '\0';
 				break;
 			}
@@ -115,7 +114,7 @@ int main() {
 				recipient[i] = getchar();
 			}
 		}
-		getchar(); // plug for avoiding '\n' in fgets
+		getchar(); // plug for avoiding ':' in fgets
 
 		//Getting a message from stdin and translating
 		fgets(clientBuff.data(), clientBuff.size(), stdin);
