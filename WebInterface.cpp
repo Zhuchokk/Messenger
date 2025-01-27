@@ -52,7 +52,7 @@ void EndString(char* text, int len) {
 
 void PrintString(char* text, int len) {
 	int i = 0;
-	while (text[i] != '\0' && i < len) {
+	while ((text[i] != '\0' || i == 0) && i < len) {
 		cout << text[i++];
 	}
 }

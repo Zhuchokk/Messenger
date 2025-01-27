@@ -120,7 +120,6 @@ int main() {
 
 
 	while (true) {
-
 		vector<char> encrypted(BUFF_SIZE), recipient(NAME_LIMIT);
 		for (int i = 0; i < NAME_LIMIT; i++) {
 			if (cin.peek() == ':') {
@@ -134,35 +133,42 @@ int main() {
 		getchar(); // plug for avoiding ':' in fgets
 
 		//Getting a message from stdin and translating
-		fgets(clientBuff.data(), clientBuff.size(), stdin);
-		encrypted = translation(clientBuff, key);
+		bool first = 1;
+		while (count(clientBuff.begin(), clientBuff.end(), '\n') == 0 || first) {
+			fgets(clientBuff.data(), clientBuff.size(), stdin);
 
-		//Adding for encrypted text the recipient, separated by : in both sides
-		encrypted.push_back(':'); //separator
-		for (int i = 0; i < recipient.size(); i++) {
-			if (recipient[i] != '\0') {
-				encrypted.push_back(recipient[i]);
+			// Check whether client like to stop chatting 
+			if (clientBuff[0] == '/') {
+				cout << "Finishing session...";
+				shutdown(ClientSock, SD_BOTH);
+				closesocket(ClientSock);
+				WSACleanup();
+				return 0;
 			}
-		}
-		encrypted.push_back(':'); //separator
 
-		// Check whether client like to stop chatting 
-		if (clientBuff[0] == '/') {
-			cout << "Finishing session...";
-			shutdown(ClientSock, SD_BOTH);
-			closesocket(ClientSock);
-			WSACleanup();
-			return 0;
-		}
+			encrypted = translation(clientBuff, key);
 
-		//Send
-		packet_size = send(ClientSock, encrypted.data(), encrypted.size(), 0);
-		if (packet_size == SOCKET_ERROR) {
-			cout << "Can't send message to Server. Error # " << WSAGetLastError() << endl;
-			closesocket(ClientSock);
-			WSACleanup();
-			return 1;
+			//Adding for encrypted text the recipient, separated by : in both sides
+			encrypted.push_back(':'); //separator
+			for (int i = 0; i < recipient.size(); i++) {
+				if (recipient[i] != '\0') {
+					encrypted.push_back(recipient[i]);
+				}
+			}
+			encrypted.push_back(':'); //separator
+
+			
+			//Send
+			packet_size = send(ClientSock, encrypted.data(), encrypted.size(), 0);
+			if (packet_size == SOCKET_ERROR) {
+				cout << "Can't send message to Server. Error # " << WSAGetLastError() << endl;
+				closesocket(ClientSock);
+				WSACleanup();
+				return 1;
+			}
+			first = 0;
 		}
+		
 
 		
 

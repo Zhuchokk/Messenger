@@ -70,8 +70,9 @@ void SendData() {
 			start++;
 			while (start != mes_to_send.front().end() && *start != ':') {
 				recipient_name.push_back(*start);
-				start++;
 				cout << *start;
+				start++;
+				
 			}
 			mes_to_send.front().resize(start - mes_to_send.front().begin() -1 - recipient_name.size());
 
