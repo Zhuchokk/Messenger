@@ -10,9 +10,11 @@
 #define HIGH_VERSION 2.2
 #define IP "127.0.0.1"
 #define PORT 1234
-#define BUFF_SIZE 256
-#define SEND_TIMEOUT 500 // millsec
-#define NAME_LIMIT 6 // < BUFF_DATA
+#define BUFF_SIZE 256 //symbols
+#define SEND_TIMEOUT 100 // millsec
+#define CLIENT_TIMEOUT 110 // millsec
+#define NAME_LIMIT 6 // < BUFF_SIZE
+#define SOCKET_DISCONNECTED 0
 
 
 bool CheckVersion();

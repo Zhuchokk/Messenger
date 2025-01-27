@@ -160,6 +160,7 @@ int main() {
 			
 			//Send
 			packet_size = send(ClientSock, encrypted.data(), encrypted.size(), 0);
+			this_thread::sleep_for(chrono::milliseconds(CLIENT_TIMEOUT));
 			if (packet_size == SOCKET_ERROR) {
 				cout << "Can't send message to Server. Error # " << WSAGetLastError() << endl;
 				closesocket(ClientSock);

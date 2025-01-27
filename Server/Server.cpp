@@ -23,6 +23,9 @@ void RecieveData(SOCKET client) {
 	while (true) {
 		vector <char> Buff(BUFF_SIZE);
 		short packet_size = recv(client, Buff.data(), Buff.size(), 0);
+
+		if (packet_size == SOCKET_DISCONNECTED)
+			return;
 		//first greeting, the user sending his name
 		if (!greeting) {
 			clients.push_back(client);
@@ -70,7 +73,6 @@ void SendData() {
 			start++;
 			while (start != mes_to_send.front().end() && *start != ':') {
 				recipient_name.push_back(*start);
-				cout << *start;
 				start++;
 				
 			}
@@ -141,7 +143,7 @@ int main() {
 		else {
 			cout << "Listening..." << endl;
 		}
-
+		
 		sockaddr_in clientInfo;
 
 		ZeroMemory(&clientInfo, sizeof(clientInfo));
