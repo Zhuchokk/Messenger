@@ -90,10 +90,20 @@ int main() {
 
 	//Getting keys
 	cout << "The system is protected using RSA algorithm. Please enter 2 crypto keys:";
-	cin >> p >> q;
-	while (!IsGenPos(p, q)) {
-		cout << "Incorrect values, try again:";
+	while (true) {
 		cin >> p >> q;
+
+		if (cin.fail()) {
+			cout << "Invalid input, please enter integers: ";
+			cin.clear(); 
+			cin.ignore(10000, '\n');
+		}
+		else if (!IsGenPos(p, q)) {
+			cout << "Incorrect values, try again: ";
+		}
+		else {
+			break;
+		}
 	}
 	key = key_generation(p, q);
 	int check = key.second;
