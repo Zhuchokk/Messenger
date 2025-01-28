@@ -24,8 +24,26 @@ void RecieveData(SOCKET client) {
 		vector <char> Buff(BUFF_SIZE);
 		short packet_size = recv(client, Buff.data(), Buff.size(), 0);
 
-		if (packet_size == SOCKET_DISCONNECTED)
+		if (packet_size == SOCKET_DISCONNECTED) {
+			int index = find(clients.begin(), clients.end(), client) - clients.begin();
+
+			cout << "User ";
+			PrintString(names[index].data(), names[index].size());
+			cout << " disconnected" << endl;
+
+			vector<char> user_deleted = names[index];
+
+			user_deleted.insert(user_deleted.begin(), 'D');
+			user_deleted.insert(user_deleted.begin(), 'M');
+			user_deleted.insert(user_deleted.begin(), 'S');
+			user_deleted.push_back(':');
+			user_deleted.push_back(':');
+			mes_to_send.push(user_deleted);
+
+			names.erase(names.begin() + index);
 			return;
+		}
+			
 		//first greeting, the user sending his name
 		if (!greeting) {
 			clients.push_back(client);
@@ -44,6 +62,7 @@ void RecieveData(SOCKET client) {
 			PrintString(Buff.data(), Buff.size());
 			cout << " connected" << endl;
 			//Sending message about new user to all
+			Buff.insert(Buff.begin(), 'C');
 			Buff.insert(Buff.begin(), 'M');
 			Buff.insert(Buff.begin(), 'S');
 			Buff.push_back(':');

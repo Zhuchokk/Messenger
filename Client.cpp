@@ -24,16 +24,25 @@ void RecieveData(SOCKET self) {
 		if (packet_size != SOCKET_ERROR) {
 			if (Buff[0] == 'S' && Buff[1] == 'M') { //Server messege
 				vector<char> name;
-				for (int i = 2; i < Buff.size(); i++) {
+				for (int i = 3; i < Buff.size(); i++) {
 					if (Buff[i] != ' ' && Buff[i] != '\0')
 						name.push_back(Buff[i]);
 					else
 						break;
 				}
-				cout << "\nNew user: ";
-				PrintString(name.data(), name.size());
-				cout << endl;
-				available_users.push_back(name);
+				if (Buff[2] == 'C') { //connection
+					cout << "\nNew user: ";
+					PrintString(name.data(), name.size());
+					cout << endl;
+					available_users.push_back(name);
+				}
+				else if(Buff[2] == 'D') { //disconnection
+					cout << "\nUser ";
+					PrintString(name.data(), name.size());
+					cout << " diconnected" << endl;
+					available_users.erase(find(available_users.begin(), available_users.end(), name));
+				}
+				
 			}
 			else {
 				vector<char> txt = retranslation(Buff, key);
