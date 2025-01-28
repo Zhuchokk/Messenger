@@ -109,6 +109,10 @@ int main() {
 	for (int i = 0; i < NAME_LIMIT; i++) {
 		if (cin.peek() == '\n') {
 			myname[i] = '\0';
+			if (i == 0) {
+				cout << "Ok. If you don't know your name, I will give you the new one: Idiot";
+				myname = {'I', 'd', 'i', 'o', 't'};
+			}
 			break;
 		}
 		else {

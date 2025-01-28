@@ -57,6 +57,14 @@ void RecieveData(SOCKET client) {
 				}
 			}
 			Buff.resize(rs);
+			//checking wether the name is duplicate
+			if (count(names.begin(), names.end(), Buff) != 0) {
+				cout << "There is a duplicate of user ";
+				PrintString(Buff.data(), Buff.size());
+				cout << endl;
+				closesocket(client);
+				return;
+			}
 			names.push_back(Buff);
 			cout << "User ";
 			PrintString(Buff.data(), Buff.size());

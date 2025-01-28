@@ -13,7 +13,7 @@
 #define BUFF_SIZE 256 //symbols
 #define SEND_TIMEOUT 100 // millsec
 #define CLIENT_TIMEOUT 110 // millsec
-#define NAME_LIMIT 6 // < BUFF_SIZE
+#define NAME_LIMIT 6 // < BUFF_SIZE and >5
 #define SOCKET_DISCONNECTED 0
 
 
