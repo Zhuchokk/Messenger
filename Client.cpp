@@ -47,12 +47,9 @@ void RecieveData(SOCKET self) {
 			else {
 				vector<char> txt = retranslation(Buff, key);
 				PrintString(txt.data(), txt.size());
-			}
-			
+			}	
 		}
-
 	}
-
 }
 
 int main() {
@@ -89,7 +86,7 @@ int main() {
 		cout << "Connection established SUCCESSFULLY. Ready to send a message to Server"<< endl;
 
 	//Getting keys
-	cout << "The system is protected using RSA algorithm. Please enter 2 crypto keys:";
+	cout << "The system is protected using RSA algorithm. Please enter two crypto keys (two prime numbers): ";
 	while (true) {
 		cin >> p >> q;
 
@@ -116,9 +113,13 @@ int main() {
 
 	//Getting the name of user, then send it
 	cout << "Enter your name: ";
+	int namelong = 0;
 	for (int i = 0; i < NAME_LIMIT; i++) {
 		if (cin.peek() == '\n') {
 			myname[i] = '\0';
+			if (namelong == 0) {
+				namelong = i;
+			}
 			if (i == 0) {
 				cout << "Ok. If you don't know your name, I will give you the new one: Idiot";
 				myname = {'I', 'd', 'i', 'o', 't'};
@@ -133,14 +134,11 @@ int main() {
 
 	send(ClientSock, myname.data(), myname.size(), 0);
 	
-	
-
 	thread recieving(RecieveData, ClientSock);
 	recieving.detach();
 
 	vector <char> clientBuff((BUFF_SIZE - NAME_LIMIT - 2) / crypt_len);							
 	short packet_size = 0;
-
 
 	while (true) {
 		vector<char> encrypted(BUFF_SIZE), recipient(NAME_LIMIT);
@@ -155,11 +153,44 @@ int main() {
 		}
 		getchar(); // plug for avoiding ':' in fgets
 
-		//Getting a message from stdin and translating
 		bool first = 1;
+
+		//translating and sending username with ' --> '
+		int endname = 0;
+		for (int i = 0; i < myname.size(); i++) {
+			clientBuff[i] = myname[i];
+		}
+		clientBuff[namelong] = ' ';
+		clientBuff[namelong + 1] = '-';
+		clientBuff[namelong + 2] = '-';
+		clientBuff[namelong + 3] = '>';
+		clientBuff[namelong + 4] = ' ';
+		clientBuff[namelong + 5] = '\0';
+
+		encrypted = translation(clientBuff, key);
+
+		//Adding for encrypted text the recipient, separated by : in both sides
+		encrypted.push_back(':'); //separator
+		for (int i = 0; i < recipient.size(); i++) {
+			if (recipient[i] != '\0') {
+				encrypted.push_back(recipient[i]);
+			}
+		}
+		encrypted.push_back(':'); //separator
+
+		//Send
+		packet_size = send(ClientSock, encrypted.data(), encrypted.size(), 0);
+		this_thread::sleep_for(chrono::milliseconds(CLIENT_TIMEOUT));
+		if (packet_size == SOCKET_ERROR) {
+			cout << "Can't send message to Server. Error # " << WSAGetLastError() << endl;
+			closesocket(ClientSock);
+			WSACleanup();
+			return 1;
+		}
+
+		//Getting a message from stdin and translating
 		while (count(clientBuff.begin(), clientBuff.end(), '\n') == 0 || first) {
 			fgets(clientBuff.data(), clientBuff.size(), stdin);
-
 			// Check whether client like to stop chatting 
 			if (clientBuff[0] == '/') {
 				cout << "Finishing session...";
@@ -180,7 +211,7 @@ int main() {
 			}
 			encrypted.push_back(':'); //separator
 
-			
+
 			//Send
 			packet_size = send(ClientSock, encrypted.data(), encrypted.size(), 0);
 			this_thread::sleep_for(chrono::milliseconds(CLIENT_TIMEOUT));
@@ -192,10 +223,6 @@ int main() {
 			}
 			first = 0;
 		}
-		
-
-		
-
 	}
 
 	closesocket(ClientSock);
