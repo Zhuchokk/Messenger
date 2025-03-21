@@ -45,7 +45,7 @@ void RecieveData(SOCKET self) {
 				
 			}
 			else {
-				vector<char> txt = retranslation(Buff, key);
+				vector<char> txt = Crypto::retranslation(Buff, key);
 				PrintString(txt.data(), txt.size());
 			}	
 		}
@@ -95,14 +95,14 @@ int main() {
 			cin.clear(); 
 			cin.ignore(10000, '\n');
 		}
-		else if (!IsGenPos(p, q)) {
+		else if (!Crypto::IsGenPos(p, q)) {
 			cout << "Incorrect values, try again: ";
 		}
 		else {
 			break;
 		}
 	}
-	key = key_generation(p, q);
+	key = Crypto::key_generation(p, q);
 	int check = key.second;
 	while (check != 0) {
 		check /= 10;
@@ -167,7 +167,7 @@ int main() {
 		clientBuff[namelong + 4] = ' ';
 		clientBuff[namelong + 5] = '\0';
 
-		encrypted = translation(clientBuff, key);
+		encrypted = Crypto::translation(clientBuff, key);
 
 		//Adding for encrypted text the recipient, separated by : in both sides
 		encrypted.push_back(':'); //separator
@@ -200,7 +200,7 @@ int main() {
 				return 0;
 			}
 
-			encrypted = translation(clientBuff, key);
+			encrypted = Crypto::translation(clientBuff, key);
 
 			//Adding for encrypted text the recipient, separated by : in both sides
 			encrypted.push_back(':'); //separator
