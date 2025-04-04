@@ -1,4 +1,5 @@
-﻿#include <iostream>
+﻿#pragma once
+#include <iostream>
 #include <WinSock2.h>
 #include <WS2tcpip.h>
 #include <stdio.h>
@@ -8,6 +9,7 @@
 #include<thread>
 #include <queue>
 #include<chrono>
+#include "Server.h"
 
 
 #pragma comment(lib, "Ws2_32.lib")
@@ -18,7 +20,7 @@ queue<vector<char>> mes_to_send;
 vector<SOCKET> clients;
 vector<vector<char>> names;
 
-void RecieveData(SOCKET client) {
+void Server::RecieveData(SOCKET client) {
 	bool greeting = 0;
 	while (true) {
 		vector <char> Buff(BUFF_SIZE);
@@ -91,7 +93,7 @@ void RecieveData(SOCKET client) {
 	}
 	
 }
-void SendData() {
+void Server::SendData() {
 	while (true) {
 		if (!mes_to_send.empty()) {
 			//Separating a name from a text
@@ -127,7 +129,7 @@ void SendData() {
 	}
 }
 
-int main() {
+int Server::Work() {
 	CheckVersion();
 	SOCKET& ServSock = CreateSocket();
 
@@ -155,7 +157,7 @@ int main() {
 	else
 		cout << "Binding socket to Server info is OK" << endl;
 
-	thread sending(SendData);
+	thread sending(&Server::SendData, this);
 	sending.detach();
 
 	while (true) {
@@ -179,11 +181,13 @@ int main() {
 
 		SOCKET ClientConn = accept(ServSock, (sockaddr*)&clientInfo, &clientInfo_size);
 		if (ClientConn != INVALID_SOCKET) {
-			thread receiving(RecieveData, ClientConn);
+			thread receiving(&Server::RecieveData, this, ClientConn);
 			receiving.detach();
-		}
-			
+		}			
 	}
+}
 
-	
+int main() {
+	Server a;
+	a.Work();
 }
