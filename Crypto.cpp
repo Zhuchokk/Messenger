@@ -1,20 +1,24 @@
-﻿#include <iostream>
+﻿#pragma once
+
+#include <iostream>
 #include <algorithm>
 #include <string>
 #include <vector>
 #include <numeric>
 #include <cmath>
+
+#include "Crypto.h"
 using namespace std;
 
 //finding GCD of two numbers
-int gcd(int a, int b) {
+int Crypto::gcd(int a, int b) {
 	if (b == 0)
 		return a;
 	return gcd(b, a % b);
 }
 
 //checking a number for simplicity by iterating through the odd numbers up to sqrt(N)
-bool IsPrime(int &N) {
+bool Crypto::IsPrime(int &N) {
 	if (N == 1) {
 		return 0;
 	}
@@ -45,7 +49,7 @@ bool IsPrime(int &N) {
 }
 
 //Euler function (counting the number of numbers less than N and mutually prime with it)
-int Euler(int& N) {
+int Crypto::Euler(int& N) {
 	int sum;
 	if (N == 1) {
 		sum = 1;
@@ -85,7 +89,7 @@ int Euler(int& N) {
 }
 
 //Euclid's advanced algorithm
-int Euclid_algo(int a, int b) {
+int Crypto::Euclid_algo(int a, int b) {
 	if (a < 1 or b < 2) {
 		return -1;
 	}
@@ -106,7 +110,7 @@ int Euclid_algo(int a, int b) {
 }
 
 //checking the keys generation capability
-bool IsGenPos(int& p, int& q) {
+bool Crypto::IsGenPos(int& p, int& q) {
 	if ((IsPrime(p) == 0) || (IsPrime(q) == 0)) {
 		return 0;
 	}
@@ -121,7 +125,7 @@ bool IsGenPos(int& p, int& q) {
 }
 
 //open and private keys generation
-pair<pair<int, int>, int> key_generation(int &p, int &q) {
+pair<pair<int, int>, int> Crypto::key_generation(int &p, int &q) {
 	int N = p * q;
 	int f = Euler(N);
 	int e = f - 1;
@@ -135,7 +139,7 @@ pair<pair<int, int>, int> key_generation(int &p, int &q) {
 }
 
 //encrypting an incoming message
-vector<char> translation(vector<char>& message, pair <pair<int, int>, int> &keys) {
+vector<char> Crypto::translation(vector<char>& message, pair <pair<int, int>, int> &keys) {
 	vector<int> trans1(message.size()), trans2(message.size());
 	vector<char> mutation;
 	for (int i = 0; i < message.size(); i++) {
@@ -184,7 +188,7 @@ vector<char> translation(vector<char>& message, pair <pair<int, int>, int> &keys
 }
 
 //exponentiation
-int exponent(int a, int n) {
+int Crypto::exponent(int a, int n) {
 	if (n == 0) {
 		return 1;
 	}
@@ -194,7 +198,7 @@ int exponent(int a, int n) {
 }
 
 //decryption and assembly of the final message
-vector<char> retranslation(vector<char> &server_gift, pair <pair<int, int>, int> &keys) {
+vector<char> Crypto::retranslation(vector<char> &server_gift, pair <pair<int, int>, int> &keys) {
 	vector<int> sg;
 	int a = 0, count = 0;
 	for (int i = 0; i < server_gift.size(); i++) {
@@ -234,14 +238,14 @@ vector<char> retranslation(vector<char> &server_gift, pair <pair<int, int>, int>
 	cout << "Введите два простых числа p и q:" << endl;
 	int p, q;
 	cin >> p >> q;
-	int a = IsGenPos(p, q);
+	int a = Crypto::IsGenPos(p, q);
 
 	while (a == 0) {
 		cout << "Невозможно сгенерировать ключи." << endl << "Введите два простых числа p и q:" << endl;
 		cin >> p >> q;
-		a = IsGenPos(p, q);
+		a = Crypto::IsGenPos(p, q);
 	}
-	pair<pair<int, int>, int> work = key_generation(p, q);
+	pair<pair<int, int>, int> work = Crypto::key_generation(p, q);
 	string input;
 	getline(cin, input);
 	vector<char> symbols;
@@ -249,8 +253,8 @@ vector<char> retranslation(vector<char> &server_gift, pair <pair<int, int>, int>
 		symbols.push_back(input[i]);
 	}
 	
-	vector<char> to_server = translation(symbols, work);
-	vector<char> result = retranslation(to_server, work);
+	vector<char> to_server = Crypto::translation(symbols, work);
+	vector<char> result = Crypto::retranslation(to_server, work);
 	for (int i = 0; i < result.size(); i++) {
 		cout << result[i];
 	}
