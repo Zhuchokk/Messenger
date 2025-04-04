@@ -7,15 +7,14 @@
 #include"WebInterface.h"
 #include<thread>
 #include"Crypto.h"
+#include"Client.h"
 
 #pragma comment(lib, "Ws2_32.lib")
 
 using namespace std;
 
-pair<pair<int, int>, int> key;
-vector<vector<char>> available_users = { {}};
 
-void RecieveData(SOCKET self) {
+void Client::RecieveData(SOCKET self) {
 	vector <char> Buff(BUFF_SIZE);
 	
 
@@ -52,12 +51,12 @@ void RecieveData(SOCKET self) {
 	}
 }
 
-int main() {
+int Client::Start() {
 	int p, q, crypt_len = 0;
 	vector<char> myname(NAME_LIMIT);
 
 	CheckVersion();
-	SOCKET& ClientSock = CreateSocket();
+	ClientSock = CreateSocket();
 
 	sockaddr_in servInfo;
 
@@ -83,7 +82,7 @@ int main() {
 		return 1;
 	}
 	else
-		cout << "Connection established SUCCESSFULLY. Ready to send a message to Server"<< endl;
+		cout << "Connection established SUCCESSFULLY. Ready to send a message to Server" << endl;
 
 	//Getting keys
 	cout << "The system is protected using RSA algorithm. Please enter two crypto keys (two prime numbers): ";
@@ -92,7 +91,7 @@ int main() {
 
 		if (cin.fail()) {
 			cout << "Invalid input, please enter integers: ";
-			cin.clear(); 
+			cin.clear();
 			cin.ignore(10000, '\n');
 		}
 		else if (!IsGenPos(p, q)) {
@@ -122,7 +121,7 @@ int main() {
 			}
 			if (i == 0) {
 				cout << "Ok. If you don't know your name, I will give you the new one: Idiot";
-				myname = {'I', 'd', 'i', 'o', 't'};
+				myname = { 'I', 'd', 'i', 'o', 't' };
 			}
 			break;
 		}
@@ -133,8 +132,10 @@ int main() {
 	getchar();
 
 	send(ClientSock, myname.data(), myname.size(), 0);
-	
-	thread recieving(RecieveData, ClientSock);
+}
+
+int Client::Work() {
+	thread recieving(&Client::RecieveData, this, ClientSock);
 	recieving.detach();
 
 	vector <char> clientBuff((BUFF_SIZE - NAME_LIMIT - 2) / crypt_len);							
@@ -229,4 +230,11 @@ int main() {
 	WSACleanup();
 
 	return 0;
+}
+
+
+int main() {
+	Client c;
+	c.Start();
+	c.Work();
 }
