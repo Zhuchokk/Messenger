@@ -41,6 +41,7 @@ void RecieveData(SOCKET client) {
 			mes_to_send.push(user_deleted);
 
 			names.erase(names.begin() + index);
+			clients.erase(clients.begin() + index);
 			return;
 		}
 			
@@ -81,9 +82,43 @@ void RecieveData(SOCKET client) {
 		//ordinary recieving
 		else {
 			if (packet_size != SOCKET_ERROR) {
-				mes_to_send.push(Buff);
-				PrintString(Buff.data(), Buff.size());
-				cout << endl;
+				if (Buff.size() >= 3 && Buff[0] == 'd' && Buff[1] == 'e' && Buff[2] == 'l') {
+					vector<char> user_to_delete;
+					for (int i = 4; i < Buff.size(); i++) {
+						if (Buff[i] != ' ' && Buff[i] != '\0') {
+							user_to_delete.push_back(Buff[i]);
+						}
+						else {
+							break;
+						}
+						
+					}
+					//Assume that given name exists
+					int it = find(names.begin(), names.end(), user_to_delete) - names.begin();
+					shutdown(clients[it], SD_BOTH);
+					closesocket(clients[it]);
+					vector<char> user_deleted = names[it];
+
+					user_deleted.insert(user_deleted.begin(), 'D');
+					user_deleted.insert(user_deleted.begin(), 'M');
+					user_deleted.insert(user_deleted.begin(), 'S');
+					user_deleted.push_back(':');
+					user_deleted.push_back(':');
+					mes_to_send.push(user_deleted);
+
+					cout << "User ";
+					PrintString(names[it].data(), names[it].size());
+					cout << " has been forcibly disconnected by administrator" << endl;
+
+					names.erase(names.begin() + it);
+					clients.erase(clients.begin() + it);
+				}
+				else {
+					mes_to_send.push(Buff);
+					PrintString(Buff.data(), Buff.size());
+					cout << endl;
+				}
+				
 			}
 		}
 		

@@ -20,6 +20,10 @@ void Client::RecieveData(SOCKET self) {
 
 	while (true) {
 		short packet_size = recv(self, Buff.data(), Buff.size(), 0);
+		if (packet_size == SOCKET_DISCONNECTED) {
+			cout << endl << "You are disconnected from server." << endl;
+			return;
+		}
 		if (packet_size != SOCKET_ERROR) {
 			if (Buff[0] == 'S' && Buff[1] == 'M') { //Server messege
 				vector<char> name;
@@ -52,9 +56,8 @@ void Client::RecieveData(SOCKET self) {
 }
 
 int Client::Start() {
-	int p, q, crypt_len = 0;
-	vector<char> myname(NAME_LIMIT);
-
+	int p, q;
+	myname.resize(NAME_LIMIT);
 	CheckVersion();
 	ClientSock = CreateSocket();
 
@@ -232,9 +235,151 @@ int Client::Work() {
 	return 0;
 }
 
+bool Administrator::IsSubVector(vector<char>& main, const vector<char>& sub) {
+	for (int i = 0; i < sub.size(); i++) {
+		if (main[i] != '\0' && sub[i] != '\0' && main[i] != sub[i]) {
+			return false;
+		}
+	}
+	return true;
+}
+
+int Administrator::Work() {
+	thread recieving(&Administrator::RecieveData, this, ClientSock);
+	recieving.detach();
+
+	vector <char> clientBuff((BUFF_SIZE - NAME_LIMIT - 2) / crypt_len);
+	short packet_size = 0;
+
+	while (true) {
+		if (cin.peek() == '/') {
+			getchar();
+			vector<char> command(20);
+			for (int i = 0; i < 20; i++) {
+				if (cin.peek() == '\n') {
+					command[i] = '\0';
+				}
+				else {
+					command[i] = getchar();
+				}
+			}
+			if (IsSubVector(command, { 'l', 'i', 's', 't', '\0' })) {
+				for (int i = 0; i < available_users.size(); ++i) {
+					for (char c : available_users[i]) {
+						cout << c;
+					}
+					cout << endl;
+				}
+			}
+			else if (IsSubVector(command, { 'd', 'e', 'l', ' ' })) {
+				send(ClientSock, command.data(), command.size(), 0);
+			}
+		}
+		vector<char> encrypted(BUFF_SIZE), recipient(NAME_LIMIT);
+		for (int i = 0; i < NAME_LIMIT; i++) {
+			if (cin.peek() == ':') {
+				recipient[i] = '\0';
+				break;
+			}
+			else {
+				recipient[i] = getchar();
+			}
+		}
+		getchar(); // plug for avoiding ':' in fgets
+
+		bool first = 1;
+
+		//translating and sending username with ' --> '
+		int endname = 0;
+		for (int i = 0; i < myname.size(); i++) {
+			clientBuff[i] = myname[i];
+		}
+		clientBuff[namelong] = ' ';
+		clientBuff[namelong + 1] = '-';
+		clientBuff[namelong + 2] = '-';
+		clientBuff[namelong + 3] = '>';
+		clientBuff[namelong + 4] = ' ';
+		clientBuff[namelong + 5] = '\0';
+
+		encrypted = Crypto::translation(clientBuff, key);
+
+		//Adding for encrypted text the recipient, separated by : in both sides
+		encrypted.push_back(':'); //separator
+		for (int i = 0; i < recipient.size(); i++) {
+			if (recipient[i] != '\0') {
+				encrypted.push_back(recipient[i]);
+			}
+		}
+		encrypted.push_back(':'); //separator
+
+		//Send
+		packet_size = send(ClientSock, encrypted.data(), encrypted.size(), 0);
+		this_thread::sleep_for(chrono::milliseconds(CLIENT_TIMEOUT));
+		if (packet_size == SOCKET_ERROR) {
+			cout << "Can't send message to Server. Error # " << WSAGetLastError() << endl;
+			closesocket(ClientSock);
+			WSACleanup();
+			return 1;
+		}
+
+		//Getting a message from stdin and translating
+		while (count(clientBuff.begin(), clientBuff.end(), '\n') == 0 || first) {
+			fgets(clientBuff.data(), clientBuff.size(), stdin);
+			// Check whether client like to stop chatting 
+			if (clientBuff[0] == '/') {
+				cout << "Finishing session...";
+				shutdown(ClientSock, SD_BOTH);
+				closesocket(ClientSock);
+				WSACleanup();
+				return 0;
+			}
+
+			encrypted = Crypto::translation(clientBuff, key);
+
+			//Adding for encrypted text the recipient, separated by : in both sides
+			encrypted.push_back(':'); //separator
+			for (int i = 0; i < recipient.size(); i++) {
+				if (recipient[i] != '\0') {
+					encrypted.push_back(recipient[i]);
+				}
+			}
+			encrypted.push_back(':'); //separator
+
+
+			//Send
+			packet_size = send(ClientSock, encrypted.data(), encrypted.size(), 0);
+			this_thread::sleep_for(chrono::milliseconds(CLIENT_TIMEOUT));
+			if (packet_size == SOCKET_ERROR) {
+				cout << "Can't send message to Server. Error # " << WSAGetLastError() << endl;
+				closesocket(ClientSock);
+				WSACleanup();
+				return 1;
+			}
+			first = 0;
+		}
+	}
+
+	closesocket(ClientSock);
+	WSACleanup();
+
+	return 0;
+}
+
+
+
 
 int main() {
-	Client c;
-	c.Start();
-	c.Work();
+	cout << "Are you an administrator?(y/n)";
+	char a; cin >> a;
+	if (a == 'y') {
+		Administrator admin;
+		admin.Start();
+		admin.Work();
+	}
+	else {
+		Client c;
+		c.Start();
+		c.Work();
+	}
+	
 }

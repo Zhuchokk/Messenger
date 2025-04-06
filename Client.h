@@ -2,7 +2,7 @@
 #include<vector>
 
 class Client {
-private:
+protected:
 	pair<pair<int, int>, int> key;
 	vector<vector<char>> available_users = { {} };
 	SOCKET ClientSock;
@@ -17,6 +17,9 @@ public:
 	int Work();
 };
 
-class Administrator : protected Client {
+class Administrator : public Client {
+private:
+	static bool IsSubVector(vector<char>& main, const vector<char>& sub);
+public:
 	int Work();
 };
