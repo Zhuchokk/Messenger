@@ -115,7 +115,7 @@ int Client::Start() {
 
 	//Getting the name of user, then send it
 	cout << "Enter your name: ";
-	int namelong = 0;
+	namelong = 0;
 	for (int i = 0; i < NAME_LIMIT; i++) {
 		if (cin.peek() == '\n') {
 			myname[i] = '\0';
@@ -253,16 +253,18 @@ int Administrator::Work() {
 
 	while (true) {
 		if (cin.peek() == '/') {
-			getchar();
+			getchar(); //skip /
 			vector<char> command(20);
 			for (int i = 0; i < 20; i++) {
 				if (cin.peek() == '\n') {
 					command[i] = '\0';
+					break;
 				}
 				else {
 					command[i] = getchar();
 				}
 			}
+			getchar(); //skip \n
 			if (IsSubVector(command, { 'l', 'i', 's', 't', '\0' })) {
 				for (int i = 0; i < available_users.size(); ++i) {
 					for (char c : available_users[i]) {
@@ -272,8 +274,24 @@ int Administrator::Work() {
 				}
 			}
 			else if (IsSubVector(command, { 'd', 'e', 'l', ' ' })) {
-				send(ClientSock, command.data(), command.size(), 0);
+				vector<char> user_del;
+				for (int i = 4; i < command.size(); i++) {
+					if (command[i] == '\0') {
+						break;
+					}
+					else {
+						user_del.push_back(command[i]);
+					}
+				}
+				if (find(available_users.begin(), available_users.end(), user_del) != available_users.end())
+					send(ClientSock, command.data(), command.size(), 0);
+				else
+					cout << "User doesn't exist" << endl;
 			}
+			else {
+				cout << "Unknown command" << endl;
+			}
+			continue;
 		}
 		vector<char> encrypted(BUFF_SIZE), recipient(NAME_LIMIT);
 		for (int i = 0; i < NAME_LIMIT; i++) {
