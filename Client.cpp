@@ -5,7 +5,7 @@
 #include <vector>
 #include<windef.h>
 #include"WebInterface.h"
-#include<thread>
+#include <thread>
 #include"Crypto.h"
 #include"Client.h"
 
@@ -66,7 +66,11 @@ int Client::Start() {
 	in_addr ip_to_num;
 	int erStat = inet_pton(AF_INET, IP, &ip_to_num);
 	if (erStat < 0) {
-		cout << "Error in IP translation to special numeric format" << endl;
+		Exception Temp("Error in IP translation to special numeric format");
+		cout << Temp.text << endl;
+		throw Temp;
+
+		//cout << "Error in IP translation to special numeric format" << endl;
 		return 1;
 	}
 
@@ -79,7 +83,11 @@ int Client::Start() {
 	erStat = connect(ClientSock, (sockaddr*)&servInfo, sizeof(servInfo));
 
 	if (erStat != 0) {
-		cout << "Connection to Server is FAILED. Error # " << WSAGetLastError() << endl;
+		Exception Temp("Connection to Server is FAILED. Error # ");
+		cout << Temp.text << endl;
+		throw Temp;
+
+		//cout << "Connection to Server is FAILED. Error # " << WSAGetLastError() << endl;
 		closesocket(ClientSock);
 		WSACleanup();
 		return 1;
@@ -186,7 +194,11 @@ int Client::Work() {
 		packet_size = send(ClientSock, encrypted.data(), encrypted.size(), 0);
 		this_thread::sleep_for(chrono::milliseconds(CLIENT_TIMEOUT));
 		if (packet_size == SOCKET_ERROR) {
-			cout << "Can't send message to Server. Error # " << WSAGetLastError() << endl;
+			Exception Temp("Can't send message to Server. Error # ");
+			cout << Temp.text << endl;
+			throw Temp;
+			
+			//cout << "Can't send message to Server. Error # " << WSAGetLastError() << endl;
 			closesocket(ClientSock);
 			WSACleanup();
 			return 1;
@@ -220,7 +232,11 @@ int Client::Work() {
 			packet_size = send(ClientSock, encrypted.data(), encrypted.size(), 0);
 			this_thread::sleep_for(chrono::milliseconds(CLIENT_TIMEOUT));
 			if (packet_size == SOCKET_ERROR) {
-				cout << "Can't send message to Server. Error # " << WSAGetLastError() << endl;
+				Exception Temp("Can't send message to Server. Error # ");
+				cout << Temp.text << endl;
+				throw Temp;
+
+				//cout << "Can't send message to Server. Error # " << WSAGetLastError() << endl;
 				closesocket(ClientSock);
 				WSACleanup();
 				return 1;
@@ -334,7 +350,11 @@ int Administrator::Work() {
 		packet_size = send(ClientSock, encrypted.data(), encrypted.size(), 0);
 		this_thread::sleep_for(chrono::milliseconds(CLIENT_TIMEOUT));
 		if (packet_size == SOCKET_ERROR) {
-			cout << "Can't send message to Server. Error # " << WSAGetLastError() << endl;
+			Exception Temp("Can't send message to Server. Error # ");
+			cout << Temp.text << endl;
+			throw Temp;
+
+			//cout << "Can't send message to Server. Error # " << WSAGetLastError() << endl;
 			closesocket(ClientSock);
 			WSACleanup();
 			return 1;
@@ -368,7 +388,11 @@ int Administrator::Work() {
 			packet_size = send(ClientSock, encrypted.data(), encrypted.size(), 0);
 			this_thread::sleep_for(chrono::milliseconds(CLIENT_TIMEOUT));
 			if (packet_size == SOCKET_ERROR) {
-				cout << "Can't send message to Server. Error # " << WSAGetLastError() << endl;
+				Exception Temp("Can't send message to Server. Error # ");
+				cout << Temp.text << endl;
+				throw Temp;
+
+				//cout << "Can't send message to Server. Error # " << WSAGetLastError() << endl;
 				closesocket(ClientSock);
 				WSACleanup();
 				return 1;
@@ -387,7 +411,7 @@ int Administrator::Work() {
 
 
 int main() {
-	cout << "Are you an administrator?(y/n)";
+	cout << "Are you an administrator? (y/n)" << endl;
 	char a; cin >> a;
 	if (a == 'y') {
 		Administrator admin;

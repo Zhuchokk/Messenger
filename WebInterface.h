@@ -4,6 +4,9 @@
 #include <WinSock2.h>
 #include <WS2tcpip.h>
 #include<windef.h>
+#include <string>
+
+using namespace std;
 
 
 #define LOW_VERSION 2
@@ -24,3 +27,10 @@ SOCKET& CreateSocket();
 void EndString(char* text, int len);
 
 void PrintString(char* text, int len);
+
+struct Exception {
+//public:
+	Exception(string mes) : text(mes) {};
+	Exception(const Exception&) { std::cout << std::endl; };
+	string text;
+};

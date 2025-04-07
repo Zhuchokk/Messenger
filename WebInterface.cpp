@@ -1,9 +1,12 @@
+#pragma once
+
 #include <iostream>
 #include <WinSock2.h>
 #include <WS2tcpip.h>
 #include<windef.h>
 #include"WebInterface.h"
-#include<vector>
+#include <vector>
+#include <string>
 
 #pragma comment(lib, "Ws2_32.lib")
 
@@ -15,8 +18,10 @@ bool CheckVersion() {
 	int erStat = WSAStartup(MAKEWORD(LOW_VERSION, HIGH_VERSION), &wsData);
 
 	if (erStat != 0) {
-		cout << "Error WinSock version initializaion #";
-		cout << WSAGetLastError();
+		Exception Temp("Error WinSock version initializaion #");
+		cout << Temp.text;
+		throw Temp;
+		//cout << "Error WinSock version initializaion #" << WSAGetLastError() << endl;
 		return 0;
 	}
 	else {
@@ -30,13 +35,17 @@ SOCKET& CreateSocket() {
 	*Sock = socket(AF_INET, SOCK_STREAM, 0);
 
 	if (*Sock == INVALID_SOCKET) {
-		cout << "Error initialization socket # " << WSAGetLastError() << endl;
+		Exception Temp("Error initialization socket # ");
+		cout << Temp.text;
+		throw Temp;		
+		//cout << "Error initialization socket # " << WSAGetLastError() << endl;
 		closesocket(*Sock);
 		WSACleanup();
 		*Sock = NULL;
 	}
-	else
+	else {
 		cout << "Server socket initialization is OK" << endl;
+	}
 	return *Sock;
 }
 
